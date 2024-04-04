@@ -233,7 +233,7 @@ cpdef leave_k_out_split(
 
 
 @cython.boundscheck(False)
-def precision_at_k(model, train_user_items, test_user_items, int K=10,
+def precision_at_k(model, train_user_items, test_user_items, usable_products, int K=10,
                    show_progress=True, int num_threads=1):
     """ Calculates P@K for a given trained model
 
@@ -263,11 +263,11 @@ def precision_at_k(model, train_user_items, test_user_items, int K=10,
         the calculated p@k
     """
     return ranking_metrics_at_k(
-        model, train_user_items, test_user_items, K, show_progress, num_threads)['precision']
+        model, train_user_items, test_user_items, usable_products, K, show_progress, num_threads)['precision']
 
 
 @cython.boundscheck(False)
-def mean_average_precision_at_k(model, train_user_items, test_user_items, int K=10,
+def mean_average_precision_at_k(model, train_user_items, test_user_items, usable_products, int K=10,
                                 show_progress=True, int num_threads=1):
     """ Calculates MAP@K for a given trained model
 
@@ -295,11 +295,11 @@ def mean_average_precision_at_k(model, train_user_items, test_user_items, int K=
         the calculated MAP@k
     """
     return ranking_metrics_at_k(
-        model, train_user_items, test_user_items, K, show_progress, num_threads)['map']
+        model, train_user_items, test_user_items, usable_products, K, show_progress, num_threads)['map']
 
 
 @cython.boundscheck(False)
-def ndcg_at_k(model, train_user_items, test_user_items, int K=10,
+def ndcg_at_k(model, train_user_items, test_user_items, usable_products, int K=10,
               show_progress=True, int num_threads=1):
     """ Calculates ndcg@K for a given trained model
 
@@ -327,11 +327,11 @@ def ndcg_at_k(model, train_user_items, test_user_items, int K=10,
         the calculated ndcg@k
     """
     return ranking_metrics_at_k(
-        model, train_user_items, test_user_items, K, show_progress, num_threads)['ndcg']
+        model, train_user_items, test_user_items, usable_products, K, show_progress, num_threads)['ndcg']
 
 
 @cython.boundscheck(False)
-def AUC_at_k(model, train_user_items, test_user_items, int K=10,
+def AUC_at_k(model, train_user_items, test_user_items, usable_products, int K=10,
              show_progress=True, int num_threads=1):
     """ Calculate limited AUC for a given trained model
 
@@ -359,11 +359,11 @@ def AUC_at_k(model, train_user_items, test_user_items, int K=10,
         the calculated AUC@k
     """
     return ranking_metrics_at_k(
-        model, train_user_items, test_user_items, K, show_progress, num_threads)['auc']
+        model, train_user_items, test_user_items, usable_products, K, show_progress, num_threads)['auc']
 
 
 @cython.boundscheck(False)
-def ranking_metrics_at_k(model, train_user_items, test_user_items, int K=10,
+def ranking_metrics_at_k(model, train_user_items, test_user_items, usable_products, int K=10,
                          show_progress=True, int num_threads=1):
     """ Calculates ranking metrics for a given trained model
 
@@ -431,7 +431,7 @@ def ranking_metrics_at_k(model, train_user_items, test_user_items, int K=10,
 
     while start_idx < len(to_generate):
         batch = to_generate[start_idx: start_idx + batch_size]
-        ids, _ = model.recommend(batch, train_user_items[batch], N=K)
+        ids, _ = model.recommend(batch, train_user_items[batch], filter_items=usable_products, N=K)
         start_idx += batch_size
 
         with nogil:
